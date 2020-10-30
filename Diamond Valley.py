@@ -18,7 +18,7 @@ mean_JP = 59456
 
 seed = 4000
 
-bet = 200
+bet = 100
 
 pct_cont = 0.2
 
@@ -43,13 +43,22 @@ def EV_func_2(JP, x):
 def EV_func_3(JP, x):
     EV = 0
     for i in range(x):
-        EV = EV + ((1-((1/pct_cont)*p))**i)*(p*(JP+ i*bet*(1/pct_cont)/100) - bet*base_loss)
+        EV = EV + ((1-((1/pct_cont)*p))**i)*(p*(JP+ i*bet*(1/pct_cont)*JP_cont) - bet*base_loss)
     return EV
 
 
 '''Shorter calculation for EV'''
 def EV_func_4(JP):
     return pct_cont*(JP + (bet*JP_cont*avg_spins))-pct_cont*(bet*avg_spins*base_loss)
+
+
+'''EV calculation with an increasingly competitive market with contribution of total market inversely proportional to JP value'''
+def EV_func_5(JP, x):
+    EV = 0
+    for i in range(x):
+        c = max(pct_cont*(1-10*(i/x)), 0.001)
+        EV = EV + ((1-((1/c)*p))**i)*(p*(JP+ i*bet*(1/c)*JP_cont) - bet*base_loss)
+    return EV
 
 
 '''CDF and PDF with Geometric distribution where p = 1/avg_spins'''
@@ -64,7 +73,7 @@ def PDF(x):
 
 '''applying EV_func_4 to calculate EV as a function of starting JP value and percent of market owned'''
 JP_values = []
-for i in range(1000000):
+for i in range(10000000):
     JP_values.append(4000 + bet*JP_cont*i)
 
 EV_list = EV_func_4(np.array(JP_values))   
@@ -109,11 +118,6 @@ ax.set_zlabel('Kelly Bank in 000');
 
 
 
-
-
-
-            
-        
 
 
 
